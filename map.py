@@ -3,18 +3,18 @@ import os
 from time import sleep
 
 
-class Map:
+class WorldMap:
     def __init__(self, length=10, height=5):
         self.length = length
         self.height = height
-        self.grid = [[Tile.get_tile("grass") for _ in range(length)] for _ in range(height)]
+        self.grid = [[Tile.get_tile("empty") for _ in range(length)] for _ in range(height)]
         self.grid_size = length * height
-        self.coordinates = [(x, y) for y in range(height) for x in range(length)]
+        self.coordinates = {(y, x): None for y in range(height) for x in range(length)}
 
 
 class Tile:
     tile_types = {
-        "empty": emojize(":white_large_square:"),
+        "empty": emojize(":brown_square:"),
         "grass": emojize(":shamrock:"),
         "tree": emojize(":evergreen_tree:"),
         "rock": emojize(":mountain:"),
@@ -27,19 +27,16 @@ class Tile:
         return Tile.tile_types.get(tile_type, Tile.tile_types["empty"])
 
 
-map = Map()
-map.grid[0][0] = Tile.get_tile("vampire")
-map.grid[1][1] = Tile.get_tile("elf")
-map.grid[4][9] = Tile.get_tile("rock")
+class Render:
+    def __init__(self, to_render):
+        self.to_render = to_render
 
-count = 0
-while count < 10:
-    os.system("cls")
-    for row in map.grid:
-        print("".join(row))
-    count += 1
-    print(f"Round {count}")
-    sleep(1)
+    def render(self):
+        for row in self.to_render.grid:
+            print("".join(row))
 
 
-
+# worldmap = WorldMap()
+# print(worldmap.coordinates)
+# renderer = Render(worldmap)
+# renderer.render()
