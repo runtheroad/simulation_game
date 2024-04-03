@@ -8,8 +8,26 @@ class WorldMap:
         self.length = length
         self.height = height
         self.grid = [[Tile.get_tile("empty") for _ in range(length)] for _ in range(height)]
-        self.grid_size = length * height
-        self.coordinates = {(y, x): None for y in range(height) for x in range(length)}
+        self.coordinates = {(x, y): None for x in range(length) for y in range(height)}
+
+
+class EntityDistribution:
+    def __init__(self, world_map):
+        self.world_map = world_map
+        self.distribution = {
+            'elf': 0.1,
+            'vampire': 0.1,
+            'grass': 0.3,
+            'rock': 0.15,
+            'tree': 0.15,
+            'empty': 0.2,
+        }
+
+    def calculate_entities(self):
+        total_cells = self.world_map.height * self.world_map.length
+        total_entities = {entity: int(total_cells * percentage) for entity, percentage
+                          in self.distribution.items()}
+        return total_entities
 
 
 class Tile:
@@ -36,7 +54,22 @@ class Render:
             print("".join(row))
 
 
+# class Populate():
+#     def __init__(self, to_populate, terrain, entities):
+#         self.to_populate = to_populate
+#         self.terrain = terrain
+#         self.entities = entities
+#
+#     def populate(self):
+#         while self.terrain or self.entities:
+
+
 # worldmap = WorldMap()
 # print(worldmap.coordinates)
 # renderer = Render(worldmap)
 # renderer.render()
+
+wm = WorldMap()
+ent = EntityDistribution(wm)
+print(ent.calculate_entities())
+print(wm.coordinates)
