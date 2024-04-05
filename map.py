@@ -1,3 +1,5 @@
+import random
+
 from emoji import emojize
 import os
 from time import sleep
@@ -31,11 +33,11 @@ class EntityDistribution:
 
 
 class CampsCalculator:
-    def __init__(self, world_map, creatures):
-        self.world_map = world_map
-        self.creatures = creatures
+    def __init__(self, entity_distribution):
+        self.world_map = entity_distribution.world_map
+        self.entity_distribution = entity_distribution
 
-    def calculate_regions(self):
+    def _calculate_regions(self):
         left_region_width = int(self.world_map.length * 0.2)
         right_region_width = left_region_width
 
@@ -44,8 +46,17 @@ class CampsCalculator:
                         for y in range(self.world_map.height)]
         return left_region, right_region
 
-    # def create_camp(self, creature):
-    #     return [(x, y) for x in range(self.calculate_camp_size(creature)) for y in range(self.world_map.height)]
+    def _get_creature_quantity(self, creature):
+        total_entities = self.entity_distribution.calculate_entities()
+        return total_entities.get(creature)
+
+    def randomize_camps(self, l_creature, r_creature):
+        left_reg, right_reg = self._calculate_regions()
+        l_c = self._get_creature_quantity(l_creature)
+        r_c = self._get_creature_quantity(r_creature)
+        l_camp = random.sample(left_reg, l_c)
+        r_camp = random.sample(right_reg, r_c)
+        return l_camp, r_camp
 
 
 class Tile:
@@ -72,14 +83,13 @@ class Render:
             print("".join(row))
 
 
-# class Populate():
-#     def __init__(self, to_populate, terrain, entities):
-#         self.to_populate = to_populate
-#         self.terrain = terrain
-#         self.entities = entities
-#
-#     def populate(self):
-#         while self.terrain or self.entities:
+class Populate:
+    def __init__(self, to_populate, entities):
+        self.to_populate = to_populate,
+        self.entities = entities
+
+   # def place_creatures(self):
+
 
 
 # worldmap = WorldMap()
@@ -89,7 +99,7 @@ class Render:
 
 wm = WorldMap()
 ent = EntityDistribution(wm)
-camps = CampsCalculator(wm, ent)
-print(camps.calculate_regions())
-print(ent.calculate_entities())
+camps = CampsCalculator(ent)
+print(camps.randomize_camps("elf", "vampire"))
+
 print(wm.coordinates)
