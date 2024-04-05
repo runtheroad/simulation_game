@@ -30,6 +30,24 @@ class EntityDistribution:
         return total_entities
 
 
+class CampsCalculator:
+    def __init__(self, world_map, creatures):
+        self.world_map = world_map
+        self.creatures = creatures
+
+    def calculate_regions(self):
+        left_region_width = int(self.world_map.length * 0.2)
+        right_region_width = left_region_width
+
+        left_region = [(x, y) for x in range(left_region_width) for y in range(self.world_map.height)]
+        right_region = [(x, y) for x in range(self.world_map.length - right_region_width, self.world_map.length)
+                        for y in range(self.world_map.height)]
+        return left_region, right_region
+
+    # def create_camp(self, creature):
+    #     return [(x, y) for x in range(self.calculate_camp_size(creature)) for y in range(self.world_map.height)]
+
+
 class Tile:
     tile_types = {
         "empty": emojize(":brown_square:"),
@@ -71,5 +89,7 @@ class Render:
 
 wm = WorldMap()
 ent = EntityDistribution(wm)
+camps = CampsCalculator(wm, ent)
+print(camps.calculate_regions())
 print(ent.calculate_entities())
 print(wm.coordinates)
