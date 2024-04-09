@@ -36,6 +36,7 @@ class CampsCalculator:
     def __init__(self, entity_distribution):
         self.world_map = entity_distribution.world_map
         self.entity_distribution = entity_distribution
+        self.camp_positions = {}
 
     def _calculate_regions(self):
         left_region_width = int(self.world_map.length * 0.2)
@@ -56,7 +57,8 @@ class CampsCalculator:
         r_c = self._get_creature_quantity(r_creature)
         l_camp = random.sample(left_reg, l_c)
         r_camp = random.sample(right_reg, r_c)
-        return l_camp, r_camp
+        self.camp_positions[l_creature] = l_camp
+        self.camp_positions[r_creature] = r_camp
 
 
 class Tile:
@@ -75,31 +77,41 @@ class Tile:
 
 
 class Render:
-    def __init__(self, to_render):
-        self.to_render = to_render
+    def __init__(self, world_map):
+        self.world_map = world_map
 
     def render(self):
-        for row in self.to_render.grid:
+        for (x, y), occupant in self.world_map.coordinates.items():
+            self.world_map.grid[y][x] = Tile.get_tile(occupant if occupant else 'empty')
+        self.print_grid()
+
+    def print_grid(self):
+        for row in self.world_map.grid:
             print("".join(row))
 
 
 class Populate:
-    def __init__(self, to_populate, entities):
-        self.to_populate = to_populate,
-        self.entities = entities
+    def __init__(self, world_map, camps_calculator):
+        self.world_map = world_map
+        self.camps_calculator = camps_calculator
 
-   # def place_creatures(self):
+    def place_creatures(self):
+        for creature, positions in self.camps_calculator.camp_positions.items():
+            for x, y in positions:
+                self.world_map.coordinates[(x, y)] = creature
 
 
+def launch_simulation():
 
-# worldmap = WorldMap()
-# print(worldmap.coordinates)
-# renderer = Render(worldmap)
-# renderer.render()
+    world_map = WorldMap()
+    entity_distribution = EntityDistribution(world_map)
+    camps_calculator = CampsCalculator(entity_distribution)
+    camps_calculator.randomize_camps('elf', 'vampire')
+    populate = Populate(world_map, camps_calculator)
+    populate.place_creatures()
+    renderer = Render(world_map)
+    renderer.render()
 
-wm = WorldMap()
-ent = EntityDistribution(wm)
-camps = CampsCalculator(ent)
-print(camps.randomize_camps("elf", "vampire"))
 
-print(wm.coordinates)
+if __name__ == "__main__":
+    launch_simulation()
