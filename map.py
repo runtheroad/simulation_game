@@ -11,6 +11,7 @@ class WorldMap:
         self.height = height
         self.grid = [[Tile.get_tile("empty") for _ in range(length)] for _ in range(height)]
         self.coordinates = {(x, y): None for x in range(length) for y in range(height)}
+        self.entities_placed = {}
 
 
 class EntityDistribution:
@@ -97,18 +98,33 @@ class Populate:
 
     def place_creatures(self):
         for creature, positions in self.camps_calculator.camp_positions.items():
+            self.world_map.entities_placed[creature] = len(positions)
             for x, y in positions:
                 self.world_map.coordinates[(x, y)] = creature
 
+    def place_terrain(self):
+        empty_coords = [coord for coord, occupant in self.world_map.coordinates.items() if occupant is None]
+        entities = self.camps_calculator.entity_distribution.calculate_entities()
+        for entity, count in entities.items():
+            if entity in self.world_map.entities_placed:
+                continue
+            else:
+                while count > 0:
+                    chosen_coord = random.choice(empty_coords)
+                    self.world_map.coordinates[chosen_coord] = entity
+                    empty_coords.remove(chosen_coord)
+                    count -= 1
+
 
 def launch_simulation():
-
     world_map = WorldMap()
     entity_distribution = EntityDistribution(world_map)
+    print(entity_distribution.calculate_entities())
     camps_calculator = CampsCalculator(entity_distribution)
     camps_calculator.randomize_camps('elf', 'vampire')
     populate = Populate(world_map, camps_calculator)
     populate.place_creatures()
+    populate.place_terrain()
     renderer = Render(world_map)
     renderer.render()
 
