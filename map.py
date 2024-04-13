@@ -1,5 +1,4 @@
 import random
-
 from emoji import emojize
 import os
 from time import sleep
