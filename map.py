@@ -108,11 +108,11 @@ class Populate:
             if entity in self.world_map.entities_placed:
                 continue
             else:
-                while count > 0:
+                for _ in range(count):
                     chosen_coord = random.choice(empty_coords)
                     self.world_map.coordinates[chosen_coord] = entity
                     empty_coords.remove(chosen_coord)
-                    count -= 1
+
 
 
 def launch_simulation():
