@@ -118,7 +118,6 @@ class Populate:
 def launch_simulation():
     world_map = WorldMap()
     entity_distribution = EntityDistribution(world_map)
-    print(entity_distribution.calculate_entities())
     camps_calculator = CampsCalculator(entity_distribution)
     camps_calculator.randomize_camps('elf', 'vampire')
     populate = Populate(world_map, camps_calculator)
