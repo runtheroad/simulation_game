@@ -1,5 +1,6 @@
 import random
 from emoji import emojize
+import entities as e
 import os
 from time import sleep
 
@@ -8,7 +9,7 @@ class WorldMap:
     def __init__(self, length=10, height=5):
         self.length = length
         self.height = height
-        self.grid = [[Tile.get_tile("empty") for _ in range(length)] for _ in range(height)]
+        self.grid = [[Tile.get_tile("mud") for _ in range(length)] for _ in range(height)]
         self.coordinates = {(x, y): None for x in range(length) for y in range(height)}
         self.entities_placed = {}
 
@@ -20,9 +21,9 @@ class EntityDistribution:
             'elf': 0.1,
             'vampire': 0.1,
             'grass': 0.3,
-            'rock': 0.15,
-            'tree': 0.15,
-            'empty': 0.2,
+            'rock': 0.2,
+            'tree': 0.2,
+            'mud': 0.1,
         }
 
     def calculate_entities(self):
@@ -31,15 +32,27 @@ class EntityDistribution:
                           in self.distribution.items()}
         return total_entities
 
+    def create_entities(self):
+        total_entities = self.calculate_entities()
+        entity_list = []
+        for entity, total in total_entities.items():
+            for _ in range(total):
+                entity_type = getattr(e, entity.capitalize())
+                new_entity = entity_type()
+                entity_list.append(new_entity)
+        return entity_list
+
 
 class CampsCalculator:
-    def __init__(self, entity_distribution):
-        self.world_map = entity_distribution.world_map
+
+    def __init__(self, world_map, entity_distribution, camp_size=0.2):
+        self.world_map = world_map
         self.entity_distribution = entity_distribution
+        self.camp_size = camp_size
         self.camp_positions = {}
 
     def _calculate_regions(self):
-        left_region_width = int(self.world_map.length * 0.2)
+        left_region_width = int(self.world_map.length * self.camp_size)
         right_region_width = left_region_width
 
         left_region = [(x, y) for x in range(left_region_width) for y in range(self.world_map.height)]
@@ -63,7 +76,7 @@ class CampsCalculator:
 
 class Tile:
     tile_types = {
-        "empty": emojize(":brown_square:"),
+        "mud": emojize(":brown_square:"),
         "grass": emojize(":shamrock:"),
         "tree": emojize(":evergreen_tree:"),
         "rock": emojize(":mountain:"),
@@ -82,7 +95,7 @@ class Render:
 
     def render(self):
         for (x, y), occupant in self.world_map.coordinates.items():
-            self.world_map.grid[y][x] = Tile.get_tile(occupant if occupant else 'empty')
+            self.world_map.grid[y][x] = Tile.get_tile(occupant if occupant else 'mud')
         self.print_grid()
 
     def print_grid(self):
@@ -114,11 +127,10 @@ class Populate:
                     empty_coords.remove(chosen_coord)
 
 
-
 def launch_simulation():
     world_map = WorldMap()
     entity_distribution = EntityDistribution(world_map)
-    camps_calculator = CampsCalculator(entity_distribution)
+    camps_calculator = CampsCalculator(world_map, entity_distribution)
     camps_calculator.randomize_camps('elf', 'vampire')
     populate = Populate(world_map, camps_calculator)
     populate.place_creatures()
